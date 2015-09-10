@@ -2,43 +2,20 @@ Red/System []
 
 #switch OS [ 
     Windows [
-    	#define csfml-audio    "libs/csfml-audio-2.dll"
-    	#define csfml-graphics "libs/csfml-graphics-2.dll"
-    	#define csfml-network  "libs/csfml-network-2.dll"
-    	#define csfml-system   "libs/csfml-system-2.dll"
-    	#define csfml-window   "libs/csfml-window-2.dll"
+    	#define csfml "libs/sfml-wrapper.dll"
     	#define calling cdecl
     ]
     Mac []
     Linux []
 ]
 
-comment {
-	typedef struct
-	{
-	    unsigned int width;        ///< Video mode width, in pixels
-	    unsigned int height;       ///< Video mode height, in pixels
-	    unsigned int bitsPerPixel; ///< Video mode pixel depth, in bits per pixels
-	} sfVideoMode;
-}
+#define sf-render-window! byte-ptr!
 
 sf-video-mode!: alias struct! [
 	width          [integer!]
 	height         [integer!]
 	bits-per-pixel [integer!]
 ]
-
-comment {
-	typedef struct
-	{
-	    unsigned int depthBits;         ///< Bits of the depth buffer
-	    unsigned int stencilBits;       ///< Bits of the stencil buffer
-	    unsigned int antialiasingLevel; ///< Level of antialiasing
-	    unsigned int majorVersion;      ///< Major number of the context version to create
-	    unsigned int minorVersion;      ///< Minor number of the context version to create
-	    sfUint32     attributeFlags;    ///< The attribute flags to create the context with
-	} sfContextSettings;
-}
 
 sf-context-settings!: alias struct! [
     depth-bits          [integer!]  ; Bits of the depth buffer
@@ -49,18 +26,36 @@ sf-context-settings!: alias struct! [
     attribute-flags     [integer!]  ; The attribute flags to create the context with
 ]
 
-comment {
-	typedef enum
-	{
-	    sfNone         = 0,      ///< No border / title bar (this flag and all others are mutually exclusive)
-	    sfTitlebar     = 1 << 0, ///< Title bar + fixed border
-	    sfResize       = 1 << 1, ///< Titlebar + resizable border + maximize button
-	    sfClose        = 1 << 2, ///< Titlebar + close button
-	    sfFullscreen   = 1 << 3, ///< Fullscreen mode (this flag and all others are mutually exclusive)
-	    sfDefaultStyle = sfTitlebar | sfResize | sfClose ///< Default window style
-	} sfWindowStyle;
-}
 
+#enum sf-event-type! [
+	sf-evt-closed                 
+    sf-evt-resized                
+    sf-evt-lost-focus              
+    sf-evt-gained-focus            
+    sf-evt-text-entered            
+    sf-evt-key-pressed             
+    sf-evt-key-released            
+    sf-evt-mouse-wheel-moved        
+    sf-evt-mouse-wheel-scrolled    
+    sf-evt-mouse-button-pressed     
+    sf-evt-mouse-button-released   
+    sf-evt-mouse-moved             
+    sf-evt-mouse-entered           
+    sf-evt-mouse-left              
+    sf-evt-joystick-button-pressed  
+    sf-evt-joystick-button-released 
+    sf-evt-joystick-moved          
+    sf-evt-joystick-connected      
+    sf-evt-joystick-disconnected   
+    sf-evt-touch-began            
+    sf-evt-touch-moved             
+    sf-evt-touch-ended             
+    sf-evt-sensor-changed         
+
+    sf-evt-count                  
+]
+comment {
+	prob dont need this crap
 #enum window-style! [
 	sf-none:          0 ; No border / title bar (this flag and all others are mutually exclusive)
     sf-title-bar:     1 ; Title bar + fixed border
@@ -69,29 +64,55 @@ comment {
     sf-full-screen:   8 ; Fullscreen mode (this flag and all others are mutually exclusive)
     sf-default-style: 7 ; Default window style
 ]
+}
+
+sf-event!: alias struct! [
+    type [integer!]
+]
 
 #import [
-	; sfRenderWindow* sfRenderWindow_create(sfVideoMode mode, const char* title, sfUint32 style, const sfContextSettings* settings)
-	csfml-graphics calling [
-		sf-render-window-create: "sfRenderWindow_create" [
-			mode     [sf-video-mode!]
-			title    [c-string!]
-			style    [integer!]
-			settings [sf-context-settings!]
+	csfml calling [
+		sf-render-window-create: "sf_render_window_create" [
+			width   [integer!]
+			height  [integer!]
+			title   [c-string!]
+			return: [sf-render-window!]
+		]
+		sf-render-window-open?: "sf_render_window_is_open" [
+			window  [sf-render-window!]
+			return: [logic!]
+		]
+		sf-render-window-poll-event: "sf_render_window_poll_event" [
+			window [sf-render-window!]
+			event  [sf-event!]
+			return: [logic!]
+		]
+		sf-render-window-set-title: "sf_render_window_set_title" [
+			window [sf-render-window!]
+			title  [c-string!]
+		]
+		sf-render-window-close: "sf_render_window_close" [
+			window [sf-render-window!]
 		]
 	]
 ]
 
 
+window: declare sf-render-window!
+
+window: sf-render-window-create 1000 500 "hi there"
+sf-render-window-create 1000 500 "hi there"
+
+event: declare sf-event!
 
 
-; sfVideoMode mode = {800, 600, 32};
-mode: declare sf-video-mode!
-mode/width: 640
-mode/height: 680
-mode/bits-per-pixel: 32
-
-
-; window = sfRenderWindow_create(mode, "SFML window", sfResize | sfClose, NULL);
-
-sf-render-window-create mode "title" sf-resize or sf-close null 
+while [sf-render-window-open? window] [
+	while [sf-render-window-poll-event window event] [
+		if (event/type = sf-evt-closed) [
+			sf-render-window-close window
+		]
+		if (event/type = sf-evt-mouse-moved) [
+			print "hiya"
+		]
+	]
+]
