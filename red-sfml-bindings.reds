@@ -2,14 +2,13 @@ Red/System []
 
 #switch OS [ 
     Windows [
-    	#define csfml "libs/sfml-wrapper.dll"
-    	#define calling cdecl
+    	#define csfml "libs/csfml-wrapper.dll"
+		#define calling cdecl
     ]
     Mac []
     Linux []
 ]
 
-#define sf-render-window! byte-ptr!
 
 sf-video-mode!: alias struct! [
 	width          [integer!]
@@ -27,47 +26,38 @@ sf-context-settings!: alias struct! [
 ]
 
 
+#define sf-render-window! int-ptr!
+#define sf-clock! int-ptr!
+#define sf-time!  int-ptr!
+#define sf-event! int-ptr!
+#define sf-enum! integer!
+
 #enum sf-event-type! [
-	sf-evt-closed                 
-    sf-evt-resized                
-    sf-evt-lost-focus              
-    sf-evt-gained-focus            
-    sf-evt-text-entered            
-    sf-evt-key-pressed             
-    sf-evt-key-released            
-    sf-evt-mouse-wheel-moved        
-    sf-evt-mouse-wheel-scrolled    
-    sf-evt-mouse-button-pressed     
-    sf-evt-mouse-button-released   
-    sf-evt-mouse-moved             
-    sf-evt-mouse-entered           
-    sf-evt-mouse-left              
-    sf-evt-joystick-button-pressed  
-    sf-evt-joystick-button-released 
-    sf-evt-joystick-moved          
-    sf-evt-joystick-connected      
-    sf-evt-joystick-disconnected   
-    sf-evt-touch-began            
-    sf-evt-touch-moved             
-    sf-evt-touch-ended             
-    sf-evt-sensor-changed         
+	sf-event-closed                 
+    sf-event-resized                
+    sf-event-lost-focus              
+    sf-event-gained-focus            
+    sf-event-text-entered            
+    sf-event-key-pressed             
+    sf-event-key-released            
+    sf-event-mouse-wheel-moved        
+    sf-event-mouse-wheel-scrolled    
+    sf-event-mouse-button-pressed     
+    sf-event-mouse-button-released   
+    sf-event-mouse-moved             
+    sf-event-mouse-entered           
+    sf-event-mouse-left              
+    sf-event-joystick-button-pressed  
+    sf-event-joystick-button-released 
+    sf-event-joystick-moved          
+    sf-event-joystick-connected      
+    sf-event-joystick-disconnected   
+    sf-event-touch-began            
+    sf-event-touch-moved             
+    sf-event-touch-ended             
+    sf-event-sensor-changed         
 
-    sf-evt-count                  
-]
-comment {
-	prob dont need this crap
-#enum window-style! [
-	sf-none:          0 ; No border / title bar (this flag and all others are mutually exclusive)
-    sf-title-bar:     1 ; Title bar + fixed border
-    sf-resize:        2 ; Titlebar + resizable border + maximize button
-    sf-close:         4 ; Titlebar + close button
-    sf-full-screen:   8 ; Fullscreen mode (this flag and all others are mutually exclusive)
-    sf-default-style: 7 ; Default window style
-]
-}
-
-sf-event!: alias struct! [
-    type [integer!]
+    sf-event-count                  
 ]
 
 #import [
@@ -94,25 +84,100 @@ sf-event!: alias struct! [
 		sf-render-window-close: "sf_render_window_close" [
 			window [sf-render-window!]
 		]
+		sf-render-window-destroy: "sf_render_window_destroy" [
+			window [sf-render-window!]
+		]
+		sf-clock-create: "sf_clock_create" [
+			return: [sf-clock!]
+		]
+		sf-clock-destroy: "sf_clock_destroy" [
+			sf-clock [sf-clock!]
+		]
+		sf-clock-restart: "sf_clock_restart" [
+			sf-clock [sf-clock!]
+			return: [sf-time!]
+		]
+		sf-time-zero: "sf_time_zero" [
+			return: [sf-time!]
+		]
+		sf-time-per-frame: "sf_time_per_frame" [
+			return: [sf-time!]
+		]
+		sf-time-milliseconds: "sf_time_milliseconds" [
+			sf-time [sf-time!]
+			return: [integer!]
+		]
+		sf-time-subtract: "sf_time_subtract" [
+			this    [sf-time!]
+			other   [sf-time!]
+			return: [sf-time!]
+		]
+		sf-time-add: "sf_time_add" [
+			this    [sf-time!]
+			other   [sf-time!]
+            return: [sf-time!]
+		]
+		sf-time-greater-than: "sf_time_greater_than" [
+			this    [sf-time!]
+			other   [sf-time!]
+			return: [logic!]
+		]
+    	sf-event-create: "sf_create_event" [
+    		return: [sf-event!]
+    	]
+    	sf-event-get-type: "sf_event_get_type" [
+    		event [sf-event!]
+    		return: [sf-enum!]
+    	]
 	]
 ]
 
 
-window: declare sf-render-window!
+
+;; make sure sf-clock-create is inside a function accessed locally
+
+;test area
+
 
 window: sf-render-window-create 1000 500 "hi there"
-sf-render-window-create 1000 500 "hi there"
 
 event: declare sf-event!
 
 
-while [sf-render-window-open? window] [
-	while [sf-render-window-poll-event window event] [
-		if (event/type = sf-evt-closed) [
-			sf-render-window-close window
+time-since-last-update: sf-time-zero
+time-per-frame: sf-time-per-frame
+
+
+
+
+main: func [] [
+	
+	clock: sf-clock-create
+	
+	while [sf-render-window-open? window] [
+		while [sf-render-window-poll-event window event] [
+			if (sf-event-get-type event) = sf-event-closed [
+				sf-render-window-close window
+			]
+			if (sf-event-get-type event) = sf-event-mouse-moved [
+				print "hiya"
+			]
+			print "hi"
 		]
-		if (event/type = sf-evt-mouse-moved) [
-			print "hiya"
+
+	    sf-clock-restart clock
+		print "hi"
+		
+		sf-time-greater-than time-since-last-update time-since-last-update
+		time-since-last-update: sf-time-add time-since-last-update time-since-last-update
+		while [sf-time-greater-than time-since-last-update time-per-frame] [
+			sf-time-set-subtract time-since-last-update time-per-frame
+			print "working"
 		]
+
 	]
 ]
+
+main
+
+sf-render-window-destroy window
