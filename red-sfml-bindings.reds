@@ -2,13 +2,21 @@ Red/System []
 
 #switch OS [ 
     Windows [
-    	#define csfml "libs/csfml-wrapper.dll"
-		#define calling cdecl
+    	#define csfml       "libs/csfml-wrapper.dll"
+    	#define sprite-lib  csfml
+    	#define texture-lib csfml
+    	#define window-lib  csfml
+    	#define calling     cdecl
     ]
     Mac []
     Linux []
 ]
 
+#define sf-render-window! byte-ptr!
+#define sf-sprite!        byte-ptr! 
+#define sf-clock!         byte-ptr!
+#define sf-texture!       byte-ptr!
+;#define sf-time! byte-ptr!
 
 sf-video-mode!: alias struct! [
 	width          [integer!]
@@ -25,12 +33,12 @@ sf-context-settings!: alias struct! [
     attribute-flags     [integer!]  ; The attribute flags to create the context with
 ]
 
+vector!: alias struct! [
+    x  [float32!] 
+    y  [float32!]
+]
 
-#define sf-render-window! int-ptr!
-#define sf-clock! int-ptr!
-#define sf-time!  int-ptr!
-#define sf-event! int-ptr!
-#define sf-enum! integer!
+
 
 #enum sf-event-type! [
 	sf-event-closed                 
@@ -38,7 +46,7 @@ sf-context-settings!: alias struct! [
     sf-event-lost-focus              
     sf-event-gained-focus            
     sf-event-text-entered            
-    sf-event-key-pressed             
+    sf-event-key-pressed        
     sf-event-key-released            
     sf-event-mouse-wheel-moved        
     sf-event-mouse-wheel-scrolled    
@@ -60,8 +68,73 @@ sf-context-settings!: alias struct! [
     sf-event-count                  
 ]
 
+sf-event!: alias struct! [
+    type [integer!]
+]
+
+sf-time!: alias struct! [
+	pad1 [integer!]
+	pad2 [integer!]
+]
+
+
 #import [
 	csfml calling [
+		sf-clock-create: "sf_clock_create" [
+			return: [sf-clock!]
+		]
+		sf-clock-destroy: "sf_clock_destroy" [
+			sf-clock [sf-clock!]
+		]
+		sf-clock-restart: "sf_clock_restart" [
+			sf-clock [sf-clock!]
+			return: [sf-time!]
+		]
+		sf-time-zero: "sf_time_zero" [
+			return: [sf-time!]
+		]
+		sf-time-per-frame: "sf_time_per_frame" [
+			return: [sf-time!]
+		]
+		sf-time-get-milliseconds: "sf_time_get_milliseconds" [
+			return: [integer!]
+		]
+		sf-time-set-subtract: "sf_time_subtract" [
+			this    [sf-time!]
+			other   [sf-time!]		]
+		sf-time-set-add: "sf_time_set_add" [
+			this    [sf-time!]
+			other   [sf-clock!]
+			return: [sf-time!]
+		]
+		sf-time-print: "sf_time_print" [
+			this [sf-time!]
+		]
+		print-integer: "print_integer" [
+			in [integer!]
+		]
+		start: "start" [
+			width          [integer!]
+			height         [integer!]
+			title          [c-string!]
+			init           [function! []]
+			process-events [function! [
+						   		window [sf-render-window!] 
+						   		event  [sf-event!]
+						   ]]
+			update         [function! [time [integer!]]]
+			render         [function! [window [sf-render-window!]]]
+			shut-down      [function! []]
+		]
+		sf-time-get-time: "sf_time_get_time" [
+			time    [sf-time!]
+			return: [float!]
+		]
+	]
+]
+
+#import [
+	window-lib calling [
 		sf-render-window-create: "sf_render_window_create" [
 			width   [integer!]
 			height  [integer!]
@@ -87,97 +160,144 @@ sf-context-settings!: alias struct! [
 		sf-render-window-destroy: "sf_render_window_destroy" [
 			window [sf-render-window!]
 		]
-		sf-clock-create: "sf_clock_create" [
-			return: [sf-clock!]
+		sf-render-window-draw-sprite: "sf_render_window_draw_sprite" [	
+			window [sf-render-window!]
+			sprite [sf-sprite!]
 		]
-		sf-clock-destroy: "sf_clock_destroy" [
-			sf-clock [sf-clock!]
+		sf-render-window-clear: "sf_render_window_clear" [
+			window [sf-render-window!]
 		]
-		sf-clock-restart: "sf_clock_restart" [
-			sf-clock [sf-clock!]
-			return: [sf-time!]
+		sf-render-window-display: "sf_render_window_display" [
+			window [sf-render-window!]
 		]
-		sf-time-zero: "sf_time_zero" [
-			return: [sf-time!]
-		]
-		sf-time-per-frame: "sf_time_per_frame" [
-			return: [sf-time!]
-		]
-		sf-time-milliseconds: "sf_time_milliseconds" [
-			sf-time [sf-time!]
-			return: [integer!]
-		]
-		sf-time-subtract: "sf_time_subtract" [
-			this    [sf-time!]
-			other   [sf-time!]
-			return: [sf-time!]
-		]
-		sf-time-add: "sf_time_add" [
-			this    [sf-time!]
-			other   [sf-time!]
-            return: [sf-time!]
-		]
-		sf-time-greater-than: "sf_time_greater_than" [
-			this    [sf-time!]
-			other   [sf-time!]
-			return: [logic!]
-		]
-    	sf-event-create: "sf_create_event" [
-    		return: [sf-event!]
-    	]
-    	sf-event-get-type: "sf_event_get_type" [
-    		event [sf-event!]
-    		return: [sf-enum!]
-    	]
+
 	]
 ]
 
+#import [
+	texture-lib calling [
+		sf-texture-create: "sf_texture_create" [
+			file-location [c-string!]
+			return:       [sf-texture!]
+		]
+		sf-texture-destroy: "sf_texture_destroy" [
+			file-location [sf-texture!]
+		]
+	]
+]
 
+#import [
+	sprite-lib calling [
+		sf-sprite-create: "sf_sprite_create" [
+			return: [sf-sprite!]
+		]
+		sf-sprite-set-texture: "sf_sprite_set_texture" [
+			sprite  [sf-sprite!]
+			texture [sf-texture!]
+		]
+		sf-sprite-set-position: "sf_sprite_set_position" [
+			sprite [sf-sprite!]
+			vector [vector!]
+		] 
+		sf-sprite-destroy: "sf_sprite_destroy" [
+			sprite [sf-sprite!]
+		]
+		sf-vector-create: "sf_vector_create" [
+			x [integer!]
+			y [integer!]
+			return: [vector!]
+		]
+	]
+]
 
-;; make sure sf-clock-create is inside a function accessed locally
 
 ;test area
 
+; TODO maybe bind directly to the c code!
+; TODO set texutre sprite, windows operations, get mario to show the eff up
 
-window: sf-render-window-create 1000 500 "hi there"
+mario-texture: sf-texture-create "test/mario.png"
+mario-sprite: sf-sprite-create
+sf-sprite-set-texture mario-sprite mario-texture
 
-event: declare sf-event!
+vec: sf-vector-create 100 100
 
-
-time-since-last-update: sf-time-zero
-time-per-frame: sf-time-per-frame
-
-
-
-
-main: func [] [
+init: func [[cdecl]] [
+	print "called"
 	
-	clock: sf-clock-create
-	
-	while [sf-render-window-open? window] [
-		while [sf-render-window-poll-event window event] [
-			if (sf-event-get-type event) = sf-event-closed [
-				sf-render-window-close window
-			]
-			if (sf-event-get-type event) = sf-event-mouse-moved [
-				print "hiya"
-			]
-			print "hi"
-		]
-
-	    sf-clock-restart clock
-		print "hi"
-		
-		sf-time-greater-than time-since-last-update time-since-last-update
-		time-since-last-update: sf-time-add time-since-last-update time-since-last-update
-		while [sf-time-greater-than time-since-last-update time-per-frame] [
-			sf-time-set-subtract time-since-last-update time-per-frame
-			print "working"
-		]
-
-	]
 ]
 
-main
+process-events: func [[cdecl] window [sf-render-window!] event [sf-event!]] [
+	if event/type = sf-event-closed [
+		sf-render-window-close window
+	]
+	if event/type = sf-event-key-pressed [
+		print "BOOM"
+	]
+	
+]
 
-sf-render-window-destroy window
+update: func [[cdecl] time [integer!]] [
+	sf-sprite-set-position mario-sprite vec
+]
+
+render: func [[cdecl] window [sf-render-window!]] [
+	sf-render-window-clear window
+	sf-render-window-draw-sprite window mario-sprite 	
+	sf-render-window-display window
+]
+
+shut-down: func [[cdecl]] [
+	sf-texture-destroy mario-texture
+	sf-sprite-destroy mario-sprite
+]
+;window: declare sf-render-window!
+;window: sf-render-window-create 1000 500 "hi there"
+;event: declare sf-event!
+;
+;main: func [] [
+;
+;	time-since-last-update: sf-time-zero
+;	time-per-frame: sf-time-per-frame
+;		
+;	clock: sf-clock-create
+;	kek: declare sf-time!
+;	while [sf-render-window-open? window] [
+;		;sf-time-print time-since-last-update
+;		while [sf-render-window-poll-event window event] [
+;			if (event/type = sf-event-closed) [
+;				sf-render-window-close window
+;			]
+;			if (event/type = sf-event-mouse-moved) [
+;				1
+;			]
+;			if (event/type = sf-event-key-pressed) [
+;				;sf-render-window-close window
+;				1
+;			]
+;		]
+;		
+;		
+;		
+;
+;		;sf-time-set-add time-since-last-update clock
+;
+;		;sf-time-print sf-clock-restart clock
+;		;sf-time-print sf-clock-restart clock
+;		;sf-time-set-add time-since-last-update kek
+;		;sf-time-print time-since-last-update
+;		;while [time-since-last-update > time-per-frame] [
+;	;		sf-time-set-subtract time-since-last-update time-per-frame
+;	;		print "working"
+;	;	]
+;
+;	]
+;
+;	sf-render-window-destroy window
+;]
+
+;main
+
+
+start 400 800 "kek" :init :process-events :update :render :shut-down
+
