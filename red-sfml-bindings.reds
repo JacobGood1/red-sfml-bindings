@@ -197,18 +197,26 @@ sf-time!: alias struct! [
 		]
 		sf-sprite-set-position: "sf_sprite_set_position" [
 			sprite [sf-sprite!]
-			vector [vector!]
+			x      [float32!]
+			y      [float32!]
 		] 
 		sf-sprite-destroy: "sf_sprite_destroy" [
 			sprite [sf-sprite!]
 		]
 		sf-vector-create: "sf_vector_create" [
-			x [integer!]
-			y [integer!]
+			x [float32!]
+			y [float32!]
 			return: [vector!]
+		]
+		test: "test" [
+			sprite [sf-sprite!]
+			vec    [vector!]
 		]
 	]
 ]
+
+
+;TODO get floats figured out... maybe try a more up to date exe
 
 
 ;test area
@@ -216,14 +224,15 @@ sf-time!: alias struct! [
 ; TODO maybe bind directly to the c code!
 ; TODO set texutre sprite, windows operations, get mario to show the eff up
 
-mario-texture: sf-texture-create "test/mario.png"
-mario-sprite: sf-sprite-create
-sf-sprite-set-texture mario-sprite mario-texture
-
-vec: sf-vector-create 100 100
 
 init: func [[cdecl]] [
-	print "called"
+	mario-texture: sf-texture-create "test/mario.png"
+	mario-sprite: sf-sprite-create
+	sf-sprite-set-texture mario-sprite mario-texture
+
+	;vec: sf-vector-create as float32! 100.0 as float32! 100.0
+	
+	sf-sprite-set-position mario-sprite as float32! 100.0 as float32! 100.0
 	
 ]
 
@@ -238,7 +247,7 @@ process-events: func [[cdecl] window [sf-render-window!] event [sf-event!]] [
 ]
 
 update: func [[cdecl] time [integer!]] [
-	sf-sprite-set-position mario-sprite vec
+	;sf-sprite-set-position mario-sprite as float32! 100 as float32! 100
 ]
 
 render: func [[cdecl] window [sf-render-window!]] [
