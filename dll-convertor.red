@@ -36,91 +36,121 @@ format-code:  [
 
 ;parse string format-code 
 
+types: [
+	"float"  ["[float32!]"]
+	"double" ["[float!]"]
+	"int"    ["[integer!]"]
+	"char"   ["[c-string!]"]
+	"bool"   ["[logic!]"]
+]
 
+format-type: [
+	(
+		remove/part mark (length? type)
+		remove/part mark (length? arg)
+		trim type
+		type: switch/default type types [
+			insert type "["
+			append type "!]" 
+			type
+		]
 
-convert-args: function [arg] [
-	new-arg: copy ""
-	format-type: [
-		(
-			trim type
-			type: switch/default type [
-				"float"  ["[float32!]"]
-				"double" ["[float!]"]
-				"int"    ["[integer!]"]
-			] [
-				insert type "["
-				append type "!]" 
-				type
-			]
-			append new-arg type
-			append new-arg " "
-			if not mark [
-				remove back back tail arg
-			]
-			append new-arg arg
-		)
-	]
+		either tail? mark [ 
+			insert mark type
+			insert mark " "
+			insert mark arg
+			insert mark " "
+			remove back mark
+		] [
+			insert mark " "
+			insert mark type
+			remove back back tail arg
+			insert mark arg
+		]
 
-	convert-args-rule: [
-		copy type thru #" " copy arg thru ", " format-type
-		| copy type thru #" " copy arg to end mark: format-type
-	]
+		mark: skip mark (length? type) + (length? arg) + 1
+	)
+]
 
-	parse arg [some convert-args-rule]
+cancel-args: [
+	  "const "
+	| "void"
+]
 
-	new-arg
+cancel-arg-rule: [
+	mark: copy arg cancel-args (remove/part mark length? arg) :mark
 ]
 
 
+convert-args-rule: [
+	cancel-arg-rule 
+	| mark: copy type thru #" " copy arg thru ", " format-type :mark
+	| copy type thru #" " copy arg to end format-type
+]
 
-
-parse 
+;kek: "sf-sprite sprite, float x, float y, int my-mom"
+;
+;parse kek [some convert-args-rule]
+;
+;
+;probe kek
+parse trim
 {
-	extern "C" __declspec(dllexport) inline void __cdecl sf_sprite_set_position(sfSprite**** sprite, float** x, float y, int**** myMom)
+	extern "C" __declspec(dllexport) inline void __cdecl sf_render_window_close(sfRenderWindow* window)
 {
-	sfVector2f temp = { x,y };
-	sfSprite_setPosition(sprite, temp);
-}
-
-extern "C" __declspec(dllexport) inline void __cdecl sf_sprite_destroy(sfSpriteFerGiva* sprite)
-{
-	sfSprite_destroy(sprite);
-}
-
-extern "C" __declspec(dllexport) inline void __cdecl sf_render_window_clear(sfRenderWindow* window)  //TODO add color parameter later on maybe
-{
-	sfRenderWindow_clear(window, sfBlack);
-}
-extern "C" __declspec(dllexport) inline void __cdecl sf_render_window_draw_sprite(sfRenderWindow* window, const sfSprite* sprite)
-{
-	sfRenderWindow_drawSprite(window, sprite, nullptr);
-}
-extern "C" __declspec(dllexport) inline void __cdecl sf_render_window_display(sfRenderWindow* window)
-{
-	sfRenderWindow_display(window);
+	sfRenderWindow_close(window);
 }
 
 } [some parse-c++]
 
 
-
-;parse "sf-sprite* sprite, float x, float y" [to ] 
-
-;; TODO fix this haneous garbage!
-
-;hi: [1 2 3 1 2 3 1 2 3]
-;
-;
-;
-;while [not tail? code] [
-;	parse code/3 format-code
-;	parse code/3 rule-convert-args
-;	code: skip code 3	
-;	
-;]
+str-format-for-final: ""
+final-code: []
+fn-name-rule: [
+	copy c to #"_" 
+	mark:
+	(remove mark head insert mark "-") 
+	skip
+	fn-name-rule
+]
 
 
 
+foreach [ret name args] code [
+	parse ret format-code
+	if (first ret) = #"-" [remove head ret]
+	parse args format-code	
+	parse args [some convert-args-rule]
+	if ret <> "void" [
+		ret: switch/default ret types [insert ret "[" append ret "!]"]
+		insert ret "return: "
+		append args ret
+	]
+	insert args "["
+ 
+	insert name {"}
+	append name {" }
+	insert args name
+	parse name fn-name-rule
+	remove head name
+	remove back back tail name
+	insert back tail name ":"
+	insert args name
+
+	append str-format-for-final args
+
+	append str-format-for-final "] "
+	append final-code str-format-for-final
+	str-format-for-final: copy ""
+]
+
+
+
+
+
+foreach var final-code [
+	parse var [some [copy name thru ":" thru {"} copy link-name thru {"} thru "[" (insert link-name {"} print [name link-name "["]) | copy args thru "]" (print args)]]
+]
 
 
 

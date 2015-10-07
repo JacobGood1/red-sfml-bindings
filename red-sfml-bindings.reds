@@ -117,7 +117,7 @@ sf-time!: alias struct! [
 			width          [integer!]
 			height         [integer!]
 			title          [c-string!]
-			init           [function! []]
+			init-screen    [function! []]
 			process-events [function! [
 						   		window [sf-render-window!] 
 						   		event  [sf-event!]
@@ -225,88 +225,43 @@ sf-time!: alias struct! [
 ; TODO set texutre sprite, windows operations, get mario to show the eff up
 
 
-init: func [[cdecl]] [
-	mario-texture: sf-texture-create "test/mario.png"
-	mario-sprite: sf-sprite-create
-	sf-sprite-set-texture mario-sprite mario-texture
-
-	;vec: sf-vector-create as float32! 100.0 as float32! 100.0
-	
-	sf-sprite-set-position mario-sprite as float32! 100.0 as float32! 100.0
-	
-]
-
-process-events: func [[cdecl] window [sf-render-window!] event [sf-event!]] [
-	if event/type = sf-event-closed [
-		sf-render-window-close window
-	]
-	if event/type = sf-event-key-pressed [
-		print "BOOM"
-	]
-	
-]
-
-update: func [[cdecl] time [integer!]] [
-	;sf-sprite-set-position mario-sprite as float32! 100 as float32! 100
-]
-
-render: func [[cdecl] window [sf-render-window!]] [
-	sf-render-window-clear window
-	sf-render-window-draw-sprite window mario-sprite 	
-	sf-render-window-display window
-]
-
-shut-down: func [[cdecl]] [
-	sf-texture-destroy mario-texture
-	sf-sprite-destroy mario-sprite
-]
-;window: declare sf-render-window!
-;window: sf-render-window-create 1000 500 "hi there"
-;event: declare sf-event!
+;init-screen: func [[cdecl]] [
+;	mario-texture: sf-texture-create "test/mario.png"
+;	mario-sprite: sf-sprite-create
+;	sf-sprite-set-texture mario-sprite mario-texture
 ;
-;main: func [] [
-;
-;	time-since-last-update: sf-time-zero
-;	time-per-frame: sf-time-per-frame
-;		
-;	clock: sf-clock-create
-;	kek: declare sf-time!
-;	while [sf-render-window-open? window] [
-;		;sf-time-print time-since-last-update
-;		while [sf-render-window-poll-event window event] [
-;			if (event/type = sf-event-closed) [
-;				sf-render-window-close window
-;			]
-;			if (event/type = sf-event-mouse-moved) [
-;				1
-;			]
-;			if (event/type = sf-event-key-pressed) [
-;				;sf-render-window-close window
-;				1
-;			]
-;		]
-;		
-;		
-;		
-;
-;		;sf-time-set-add time-since-last-update clock
-;
-;		;sf-time-print sf-clock-restart clock
-;		;sf-time-print sf-clock-restart clock
-;		;sf-time-set-add time-since-last-update kek
-;		;sf-time-print time-since-last-update
-;		;while [time-since-last-update > time-per-frame] [
-;	;		sf-time-set-subtract time-since-last-update time-per-frame
-;	;		print "working"
-;	;	]
-;
-;	]
-;
-;	sf-render-window-destroy window
+;	;vec: sf-vector-create as float32! 100.0 as float32! 100.0
+;	
+;	sf-sprite-set-position mario-sprite as float32! 100.0 as float32! 100.0
+;	
 ;]
+;
+;process-events: func [[cdecl] window [sf-render-window!] event [sf-event!]] [
+;	if event/type = sf-event-closed [
+;		sf-render-window-close window
+;	]
+;	if event/type = sf-event-key-pressed [
+;		print "BOOM"
+;	]
+;	
+;]
+;
+;update: func [[cdecl] time [integer!]] [
+;	
+;]
+;
+;render: func [[cdecl] window [sf-render-window!]] [
+;	sf-render-window-clear window
+;	sf-render-window-draw-sprite window mario-sprite 	
+;	sf-render-window-display window
+;]
+;
+;shut-down: func [[cdecl]] [
+;	sf-texture-destroy mario-texture
+;	sf-sprite-destroy mario-sprite
+;]
+;
+;
+;start 640 480 "title" :init-screen :process-events :update :render :shut-down
 
-;main
-
-
-start 400 800 "kek" :init :process-events :update :render :shut-down
 
