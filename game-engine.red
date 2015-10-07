@@ -50,7 +50,7 @@ render: func [window [integer!]] [
 			sf-render-window-close window
 		]
 		if event/type = sf-event-key-pressed [
-			print "BOOM"
+			print "hello"
 		]
 	
 	]
@@ -71,7 +71,7 @@ render: func [window [integer!]] [
 
 
 start-from-red: routine [] [
-	start 400 800 "kek" :init-screen-callback :process-events-callback :update-callback :render-callback :shut-down-callback
+	start 400 800 "title" :init-screen-callback :process-events-callback :update-callback :render-callback :shut-down-callback
 ]
 
 start-from-red
