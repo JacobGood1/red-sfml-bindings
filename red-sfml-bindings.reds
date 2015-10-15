@@ -16,7 +16,8 @@ Red/System []
 #define sf-sprite!        byte-ptr! 
 #define sf-clock!         byte-ptr!
 #define sf-texture!       byte-ptr!
-;#define sf-time! byte-ptr!
+
+ #include %arrays.reds
 
 sf-video-mode!: alias struct! [
 	width          [integer!]
@@ -208,60 +209,7 @@ sf-time!: alias struct! [
 			y [float32!]
 			return: [vector!]
 		]
-		test: "test" [
-			sprite [sf-sprite!]
-			vec    [vector!]
-		]
 	]
 ]
 
-
-;TODO get floats figured out... maybe try a more up to date exe
-
-
-;test area
-
-; TODO maybe bind directly to the c code!
-; TODO set texutre sprite, windows operations, get mario to show the eff up
-
-
-;init-screen: func [[cdecl]] [
-;	mario-texture: sf-texture-create "test/mario.png"
-;	mario-sprite: sf-sprite-create
-;	sf-sprite-set-texture mario-sprite mario-texture
-;
-;	;vec: sf-vector-create as float32! 100.0 as float32! 100.0
-;	
-;	sf-sprite-set-position mario-sprite as float32! 100.0 as float32! 100.0
-;	
-;]
-;
-;process-events: func [[cdecl] window [sf-render-window!] event [sf-event!]] [
-;	if event/type = sf-event-closed [
-;		sf-render-window-close window
-;	]
-;	if event/type = sf-event-key-pressed [
-;		print "BOOM"
-;	]
-;	
-;]
-;
-;update: func [[cdecl] time [integer!]] [
-;	
-;]
-;
-;render: func [[cdecl] window [sf-render-window!]] [
-;	sf-render-window-clear window
-;	sf-render-window-draw-sprite window mario-sprite 	
-;	sf-render-window-display window
-;]
-;
-;shut-down: func [[cdecl]] [
-;	sf-texture-destroy mario-texture
-;	sf-sprite-destroy mario-sprite
-;]
-;
-;
-;start 640 480 "title" :init-screen :process-events :update :render :shut-down
-
-
+;test-lib 

@@ -24,17 +24,22 @@ sprite: object [
 
 
 init-screen: func [] [
-	mario: sprite/create "test/mario.png"	
+		
 ]
 
 
 
-render: func [window [integer!]] [
-	sprite/draw window mario	
+render: func [window [integer!] sprite [integer!]] [ ;<-- PROBLEM IS HERE, this does not work!
+	sprite/draw window sprite	
 ]
 
 
 #system [
+    mario: sf-sprite-create 
+    texture: sf-texture-create "test/mario.png"
+    sf-sprite-set-texture mario texture
+
+
 	update-callback: func [[cdecl] time [integer!]] [
 		#call [update time]
 	]
@@ -59,8 +64,8 @@ render: func [window [integer!]] [
 
 	render-callback: func [[cdecl] window [sf-render-window!]] [
 		sf-render-window-clear window
-		#call [render as integer! window]
-		sf-render-window-display window
+		#call [render as integer! window as integer! mario]
+		sf-render-window-display window 
 	]
 
 	shut-down-callback: func [[cdecl]] [
