@@ -29,8 +29,8 @@ init-screen: func [] [
 
 
 
-render: func [window [integer!] sprite [integer!]] [ ;<-- PROBLEM IS HERE, this does not work!
-	sprite/draw window sprite	
+render: func [*window [integer!] *sprite [integer!]] [
+	sprite/draw *window *sprite	
 ]
 
 
