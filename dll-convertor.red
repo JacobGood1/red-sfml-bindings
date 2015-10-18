@@ -1,6 +1,23 @@
 Red []
 
+
+camel-case->red-case: function [word [string!]] [
+	new-word: copy "" 
+	foreach letter word [
+		either find uppercase-char letter [ 
+			append new-word "-" append 
+			new-word lowercase letter 
+		] [
+			append new-word letter
+		]
+	]
+	new-word
+]
+
+
+
 uppercase-char: charset "QWERTYUIOPASDFGHJKLZXCVBNM"
+alpha-char: charset "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
 any-char: charset "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789!@#$%^&*(),.;'/` -_"
 code: []
 
