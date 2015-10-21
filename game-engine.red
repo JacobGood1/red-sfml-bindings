@@ -4,45 +4,29 @@ Red []
 	#include %red-sfml-bindings.reds
 ]
 
-routines: context [
-	create-texture-address: routine [location [string!] return: [integer!]] [
-		as integer! sf-texture-create as c-string! string/rs-head location
-	]
-	create-sprite-address: routine [return: [integer!]] [
-		as integer! sf-sprite-create
-	]
-	set-texture: routine [sprite [integer!] texture [integer!]] [
-		sf-sprite-set-texture as byte-ptr! sprite as byte-ptr! texture
-	]
-	draw: routine [window [integer!] sprite-address [integer!]] [
-		sf-render-window-draw-sprite as byte-ptr! window as byte-ptr! sprite-address
-	]
-	destroy: routine [sprite-address [integer!] texture-address [integer!]] [
-		sf-sprite-destroy  as byte-ptr! sprite-address
-		sf-texture-destroy as byte-ptr! texture-address
-	]
-]
-
-make-sprite: function [location [string!]] [
-	temp: object [
-		texture-address: none
-		sprite-address:  none
-		draw: func [window [integer!]] [
-			routines/draw window sprite-address
-		]
-		destroy: func [] [
-			routines/destroy sprite-address texture-address
-		]
-	]
-	temp/texture-address: routines/create-texture-address location
-	temp/sprite-address: routines/create-sprite-address
-	routines/set-texture temp/sprite-address temp/texture-address
-	temp
-]
+#include %events/events.red
+#include %texture/texture.red
+#include %sprite/sprite.red
 
 init-screen: func [] [
 	print "=== Init-screen ==="
-	spr-mario: make-sprite "test/mario.png"	
+	texture/make-texture 'mario
+	spr-mario: sprite/make-sprite texture/textures/mario
+]
+
+
+handle-events: function [window* [integer!] event* [integer!]] [
+	key-code: event/get-key-code event*
+	if event/key-pressed? event* [
+		case [ ;TODO change to switch if possible
+			key-code = event/keys/a [
+				print "here!"
+			]
+			key-code = event/keys/p [
+				window/close window*
+			]
+		]
+	]
 ]
 
 update: function [time [integer!]] [
@@ -50,17 +34,22 @@ update: function [time [integer!]] [
 ]
 
 
-render: func [*window [integer!]] [
-	spr-mario/draw *window
+render: func [window* [integer!]] [
+	spr-mario/draw window*
 ]
 
-
+shut-down: func [] [
+	spr-mario/destroy
+]
+;
+;;TODO enums in red? use a map for key-cods?  anyway get key codes working some how!
+;
 #system [
-    ;mario:   sf-sprite-create 
-    ;texture: sf-texture-create "images/Telo.png"
-    ;sf-sprite-set-texture  mario texture
-   	;sf-sprite-set-position mario as float32! 100.0 as float32! 100.0
-
+;    ;mario:   sf-sprite-create 
+;    ;texture: sf-texture-create "images/Telo.png"
+;    ;sf-sprite-set-texture  mario texture
+;   	;sf-sprite-set-position mario as float32! 100.0 as float32! 100.0
+;
 	update-callback: func [[cdecl] time [integer!]] [
 		#call [update time]
 	]
@@ -68,35 +57,19 @@ render: func [*window [integer!]] [
 		#call [init-screen]
 		;vec: sf-vector-create as float32! 100.0 as float32! 100.0
 	]
-	process-events-callback: func [[cdecl] window [sf-render-window!] event* [sf-event!]] [
-		switch event/type event* [
-			sf-event-closed [
-				sf-render-window-close window
-			]
-			sf-event-key-pressed [
-				probe (event/key-pressed event*) = key-b
-				0
-			]
-			default [
-				;print as byte! event/code event*
-				0
-			]
-		]		
+	process-events-callback: func [[cdecl] window* [sf-render-window!] event* [sf-event!]] [
+		#call [handle-events as integer! window* as integer! event*]		
 	]
 	render-callback: func [[cdecl] window [sf-render-window!]] [
 		sf-render-window-clear window
 		#call [render as integer! window]
-		;sf-render-window-draw-sprite window mario
 		sf-render-window-display window 
 	]
 	shut-down-callback: func [[cdecl]] [
 		print "Closing..."
-
+		#call [shut-down]
 	]
 ]
-
-
-
 
 start-from-red: routine [] [
 	start 400 800 "title" :init-screen-callback :process-events-callback :update-callback :render-callback :shut-down-callback
