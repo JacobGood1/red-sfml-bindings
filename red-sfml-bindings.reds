@@ -59,7 +59,7 @@ sf-time!: alias struct! [
 
 #import [
 	csfml calling [
-		start: "start" [
+		start-screen: "start" [
 			width          [integer!]
 			height         [integer!]
 			title          [c-string!]
