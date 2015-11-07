@@ -12,9 +12,6 @@ Red/System []
 ]
 
 
-
-
-
 sf-video-mode!: alias struct! [
 	width          [integer!]
 	height         [integer!]
@@ -59,14 +56,31 @@ sf-time!: alias struct! [
 
 #import [
 	csfml calling [
+		;reference for future stuff may erase later
+		;start-screen: "start" [
+		;	width          [integer!]
+		;	height         [integer!]
+		;	title          [c-string!]
+		;	init-screen    [function! []]
+		;	process-events [function! [
+		;				   		window [sf-render-window!] 
+		;				   		event  [sf-event!]
+		;				   ]]
+		;	update         [function! [time [integer!]]]
+		;	render         [function! [window [sf-render-window!]]]
+		;	shut-down      [function! []]
+		;]
 		start-screen: "start" [
 			width          [integer!]
 			height         [integer!]
 			title          [c-string!]
+		]
+
+		set-callbacks: "set_callbacks" [
 			init-screen    [function! []]
 			process-events [function! [
-						   		window [sf-render-window!] 
-						   		event  [sf-event!]
+			   			   		window [sf-render-window!] 
+			   			   		event  [sf-event!]
 						   ]]
 			update         [function! [time [integer!]]]
 			render         [function! [window [sf-render-window!]]]
@@ -112,7 +126,6 @@ sf-time!: alias struct! [
 		]
 	]
 ]
-
 
 
 

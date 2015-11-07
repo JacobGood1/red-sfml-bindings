@@ -8,38 +8,69 @@ Red []
 #include %texture/texture.red
 #include %sprite/sprite.red
 
-; PROBLEM red does not support this type of coding at this time, will have to add this feature 
-; at a later date
-; each game produce a new game object where functions can be overridden to spec of whoever desires! 
-; TODO implement ^ right now game engine should be broken!
-
 
 
 game: object [
 	handle-init-screen: func [] []
-	handle-events: func [window* [integer!] event* [integer!]] []
-	handle-update: func [time [integer!]] []
-	handle-render: func [window* [integer!]] []
-	handle-shut-down: func [] []
+	handle-events: 		func [window* [integer!] event* [integer!]] []
+	handle-update: 		func [time [integer!]] []
+	handle-render: 		func [window* [integer!]] []
+	handle-shut-down: 	func [] []
 ]
 
-current-game: make game []
+;TODO when red is capable make it to where one can overwrite the functions in this
+;current game so that the updated ones will get called in reds 
 
-;handle-init-screen: func [] [
-;		print "=== Init-screen ==="
-;		texture/make-texture 'mario
-;		spr-mario: sprite/make-sprite texture/textures/mario
-;	]
-;	handle-update: function [time [integer!]] []
-;	handle-events: func [window* [integer!] event* [integer!]] []
+
+; the following code is extraneous code that the game engine does not need... for testing the binding only
+
+;; TEST BEGIN!
+texture/make eagle
+texture/make desert
+
+; the following code is extraneous code that the game engine does not need... for testing the binding only
+; this code does not use features that red WILL have, meaning it needs to be discarded
+
+;; TEST BEGIN!
+
+entity: object [
+	velocity: make vector! [0 0]
+	set-velocity: func [v [vector!]] [
+		velocity: v 
+		self
+	]
+]
+
+aircraft: sprite/make texture/textures/eagle 
+aircraft: make aircraft entity
+
+
+;; TEST END!!!
+
+current-game: make game [
+	handle-update: func [time [integer!]] [
+
+	]
+	handle-events: func [window* [integer!] event* [integer!]] [
+		if event/window-closed? event* [
+			window/close window*
+		]
+		if event/key-pressed? event* [
+		]
+	]
+	handle-render: func [window* [integer!]] [
+		aircraft/draw window*
+	]
+	handle-shut-down: func [] [
+		texture/destroy eagle
+		texture/destroy dessert
+		aircraft/destroy ;maybe unecessary
+	]
+]
+;; TEST END!!!
 
 
 #system [
-	;mario:   sf-sprite-create 
-	;texture: sf-texture-create "images/Telo.png"
-	;sf-sprite-set-texture  mario texture
-	;sf-sprite-set-position mario as float32! 100.0 as float32! 100.0
-
 	init-screen-callback: func [[cdecl]] [
 		#call [current-game/handle-init-screen]
 	]
@@ -61,21 +92,23 @@ current-game: make game []
 ]
 
 
-
 current-game: make game [
 	start: routine [title [string!] width [integer!] height [integer!]] [
+		set-callbacks :init-screen-callback
+					  :process-events-callback
+					  :update-callback 
+					  :render-callback 
+					  :shut-down-callback
 		start-screen width
 					 height
-					 as c-string! string/rs-head title 
-					 :init-screen-callback 
-					 :process-events-callback 
-					 :update-callback 
-					 :render-callback 
-					 :shut-down-callback
+					 as c-string! string/rs-head title
 	]
 ]
 
 
 
-current-game/start "hello" 400 400
+
+current-game/start "hello" 640 480
+
+
 

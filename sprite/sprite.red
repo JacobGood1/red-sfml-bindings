@@ -12,14 +12,21 @@ sprite: context [
 		sf-sprite-create
 	]
 	set-texture: routine [sprite [integer!] texture [integer!]] [
-		sf-sprite-set-texture as byte-ptr! sprite as byte-ptr! texture
+		sf-sprite-set-texture as byte-ptr! 
+		                         sprite 
+		                      as byte-ptr! 
+		                         texture
 	]
 	destroy-internal: routine [sprite-address [integer!]] [
 		sf-sprite-destroy as byte-ptr! sprite-address
 	]
-	make-sprite: function [texture* [integer!]] [
+	set-origin-to-center: routine [sprite-address [integer!]] [
+		sf-sprite-set-origin-to-center as byte-ptr! sprite-address
+	]
+	
+	make: function [texture* [integer!] return: [object!]] [
 		temp: object [
-			sprite-address:  none
+			sprite-address: create-address
 			draw: func [window* [integer!]] [
 				window/draw-sprite window* sprite-address
 			]
@@ -27,8 +34,8 @@ sprite: context [
 				destroy-internal sprite-address
 			]
 		]
-		temp/sprite-address: create-address
 		set-texture temp/sprite-address texture*
+		set-origin-to-center temp/sprite-address
 		temp
 	]
 ]

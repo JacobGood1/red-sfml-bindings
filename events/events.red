@@ -17,16 +17,16 @@ event: context [
 	;	routine args code
 	;]
 	keys: #(
-		a           0
-		b           1
-		c           2
-		d           3
-		e           4
-		f           5
-		g           6
-		h           7
-		i           8
-		j           9
+		a          0
+		b          1
+		c          2
+		d          3
+		e          4
+		f          5
+		g          6
+		h          7
+		i          8
+		j          9
 		k          10
 		l          11
 		m          12
@@ -147,7 +147,7 @@ event: context [
 			false
 		]
 	]	
-	;key-pressed?:   event-gen 'sf-event-key-pressed    ;TODO maybe these will work later, nice to check back 
+	;key-pressed?:   event-gen sf-event-key-pressed    ;TODO maybe these will work later, nice to check back 
 	;key-released?:  event-gen 'sf-event-key-released
 	;window-closed?: event-gen 'sf-event-closed	
 ]

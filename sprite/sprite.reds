@@ -41,5 +41,8 @@ vector!: alias struct! [
 			y [float32!]
 			return: [vector!]
 		]
+		sf-sprite-set-origin-to-center: "sf_sprite_set_origin_to_center" [
+			sprite [sf-sprite!]
+		]
 	]
 ]
